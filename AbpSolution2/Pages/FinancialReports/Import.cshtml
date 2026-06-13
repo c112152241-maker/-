@@ -1,0 +1,27 @@
+﻿@page
+@model AbpSolution2.Pages.FinancialReports.ImportModel
+
+@{
+    ViewData["Title"] = "匯入財報 CSV";
+}
+
+<h2>匯入財報 CSV</h2>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-warning">
+        @Model.StatusMessage
+    </div>
+}
+
+<form method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">選擇 CSV 檔案</label>
+        <input type="file" name="CsvFile" class="form-control" accept=".csv" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">開始匯入</button>
+    <a class="btn btn-secondary" href="/FinancialReports">返回列表</a>
+</form>

@@ -1,0 +1,14 @@
+{
+  "culture": "zh-Hant",
+  "texts": {
+    "AppName": "AbpSolution2",
+    "Welcome_Title": "歡迎",
+    "Welcome_Text": "這是 ABP 框架的極簡單層應用程序啟動模板.",
+    "Menu:Home": "首頁",
+    "Permission:FinancialReports": "財報系統",
+    "Permission:FinancialReports.Import": "匯入 CSV",
+    "Permission:FinancialReports.Export": "匯出 Excel",
+    "Permission:FinancialReports.Delete": "清空資料",
+    "Permission:FinancialReports.Analysis": "財報分析",
+  }
+}

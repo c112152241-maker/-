@@ -1,0 +1,217 @@
+﻿@page
+@model AbpSolution2.Pages.FinancialReports.AnalysisModel
+
+@{
+    ViewData["Title"] = "財報分析";
+}
+
+<h2>財報分析 ABP 版</h2>
+
+<div class="mb-3">
+    <a class="btn btn-secondary" href="/FinancialReports">返回列表</a>
+    <a class="btn btn-primary" href="/FinancialReports/Import">匯入 CSV</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-bg-primary h-100">
+            <div class="card-body">
+                <h5 class="card-title">公司總數</h5>
+                <p class="card-text fs-3">@Model.TotalCompanyCount</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card text-bg-success h-100">
+            <div class="card-body">
+                <h5 class="card-title">資產最高公司</h5>
+                <p>@Model.TopAssetCompany?.CompanyName</p>
+                <p class="fs-5">@Model.TopAssetCompany?.TotalAssets?.ToString("N0")</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card text-bg-warning h-100">
+            <div class="card-body">
+                <h5 class="card-title">負債比最高公司</h5>
+                <p>@Model.TopDebtRatioCompany?.CompanyName</p>
+                <p class="fs-5">@Model.TopDebtRatioCompany?.DebtRatio?.ToString("N2")%</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card text-bg-info h-100">
+            <div class="card-body">
+                <h5 class="card-title">每股淨值最高</h5>
+                <p>@Model.TopNetWorthCompany?.CompanyName</p>
+                <p class="fs-5">@Model.TopNetWorthCompany?.NetWorthPerShare?.ToString("N2")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<h4>財報圖表分析</h4>
+
+<div class="card mb-4">
+    <div class="card-header">資產總計 Top 5</div>
+    <div class="card-body">
+        <canvas id="assetChart"></canvas>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">負債比 Top 5</div>
+    <div class="card-body">
+        <canvas id="debtRatioChart"></canvas>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">每股參考淨值 Top 5</div>
+    <div class="card-body">
+        <canvas id="netWorthChart"></canvas>
+    </div>
+</div>
+
+<hr />
+
+<h4>資產總計排行榜 Top 5</h4>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>排名</th>
+            <th>公司代號</th>
+            <th>公司名稱</th>
+            <th class="text-end">資產總計</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var assetRank = 1;
+        }
+
+        @foreach (var item in Model.AssetRanking)
+        {
+            <tr>
+                <td>@assetRank</td>
+                <td>@item.CompanyCode</td>
+                <td>@item.CompanyName</td>
+                <td class="text-end">@item.TotalAssets?.ToString("N0")</td>
+            </tr>
+
+            assetRank++;
+        }
+    </tbody>
+</table>
+
+<h4 class="mt-4">負債比排行榜 Top 5</h4>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>排名</th>
+            <th>公司代號</th>
+            <th>公司名稱</th>
+            <th class="text-end">負債比</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var debtRank = 1;
+        }
+
+        @foreach (var item in Model.DebtRatioRanking)
+        {
+            <tr>
+                <td>@debtRank</td>
+                <td>@item.CompanyCode</td>
+                <td>@item.CompanyName</td>
+                <td class="text-end">@item.DebtRatio?.ToString("N2")%</td>
+            </tr>
+
+            debtRank++;
+        }
+    </tbody>
+</table>
+
+<h4 class="mt-4">每股參考淨值排行榜 Top 5</h4>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>排名</th>
+            <th>公司代號</th>
+            <th>公司名稱</th>
+            <th class="text-end">每股參考淨值</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var netWorthRank = 1;
+        }
+
+        @foreach (var item in Model.NetWorthRanking)
+        {
+            <tr>
+                <td>@netWorthRank</td>
+                <td>@item.CompanyCode</td>
+                <td>@item.CompanyName</td>
+                <td class="text-end">@item.NetWorthPerShare?.ToString("N2")</td>
+            </tr>
+
+            netWorthRank++;
+        }
+    </tbody>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const assetLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AssetChartLabels));
+    const assetValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AssetChartValues));
+
+    const debtRatioLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DebtRatioChartLabels));
+    const debtRatioValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DebtRatioChartValues));
+
+    const netWorthLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.NetWorthChartLabels));
+    const netWorthValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.NetWorthChartValues));
+
+    new Chart(document.getElementById('assetChart'), {
+    type: 'bar',
+    data: {
+    labels: assetLabels,
+    datasets: [{
+    label: '資產總計',
+    data: assetValues
+    }]
+    }
+    });
+
+    new Chart(document.getElementById('debtRatioChart'), {
+    type: 'bar',
+    data: {
+    labels: debtRatioLabels,
+    datasets: [{
+    label: '負債比 (%)',
+    data: debtRatioValues
+    }]
+    }
+    });
+
+    new Chart(document.getElementById('netWorthChart'), {
+    type: 'bar',
+    data: {
+    labels: netWorthLabels,
+    datasets: [{
+    label: '每股參考淨值',
+    data: netWorthValues
+    }]
+    }
+    });
+</script>

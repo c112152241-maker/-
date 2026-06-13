@@ -1,0 +1,79 @@
+﻿@page
+@model AbpSolution2.Pages.FinancialReports.IndexModel
+
+@{
+    ViewData["Title"] = "財報資料列表";
+}
+
+<h2>財報資料列表 ABP 版</h2>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-success">
+        @Model.StatusMessage
+    </div>
+}
+
+<div class="mb-3">
+    <a class="btn btn-primary" href="/FinancialReports/Import">
+        匯入 CSV
+    </a>
+
+    <a class="btn btn-success" href="/FinancialReports/Analysis">
+        財報分析
+    </a>
+
+    <a class="btn btn-outline-success" href="/FinancialReports?handler=Export">
+        匯出 Excel
+    </a>
+
+    <form method="post" asp-page-handler="Clear" style="display:inline;"
+          onsubmit="return confirm('確定要清空所有財報資料嗎？此動作無法復原。');">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-outline-danger">
+            清空資料
+        </button>
+    </form>
+</div>
+
+@if (!Model.Reports.Any())
+{
+    <div class="alert alert-info">
+        目前尚未匯入財報資料，請先匯入 CSV。
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>年度</th>
+                <th>季別</th>
+                <th>公司代號</th>
+                <th>公司名稱</th>
+                <th class="text-end">資產總計</th>
+                <th class="text-end">負債總計</th>
+                <th class="text-end">權益總計</th>
+                <th class="text-end">負債比</th>
+                <th class="text-end">每股參考淨值</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.Reports)
+            {
+                <tr>
+                    <td>@item.Year</td>
+                    <td>@item.Quarter</td>
+                    <td>@item.CompanyCode</td>
+                    <td>@item.CompanyName</td>
+                    <td class="text-end">@item.TotalAssets?.ToString("N0")</td>
+                    <td class="text-end">@item.TotalLiabilities?.ToString("N0")</td>
+                    <td class="text-end">@item.TotalEquity?.ToString("N0")</td>
+                    <td class="text-end">@item.DebtRatio?.ToString("N2")%</td>
+                    <td class="text-end">@item.NetWorthPerShare?.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
